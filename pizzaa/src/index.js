@@ -64,10 +64,22 @@ function Header() {
 }
 
 function Menu() {
+  const pizzas = pizzaData;
+
+  const numPizzas = pizzas.length;
   return (
     <main className="menu">
       <h2>Our Menu</h2>
-      <Pizza
+      {/* rendering list using map function because inside div/ul we need jsx so we use map instead of forEach we will get new array using map and then react knows how to render it*/}
+      {numPizzas > 0 && (
+        <ul className="pizzas">
+          {pizzas.map((pizza) => {
+            return <Pizza pizzaObj={pizza} key={pizza.name} />; // here we are passing a prop here
+          })}
+        </ul>
+      )}
+
+      {/* <Pizza
         name="Pizza Spinaci"
         ingredients="Tomato, mozarella, spinach, and ricotta cheese"
         price={23}
@@ -78,20 +90,21 @@ function Menu() {
         ingredients="Tomato, mozarella, mushrooms, and onion"
         price={12} // entering JS mode when you want to pass something that is not a string (it can be anthing object , arrays `)
         photoName="pizzas/funghi.jpg"
-      />
+      /> */}
     </main>
   );
 }
 function Pizza(props) {
+  console.log(props);
   return (
-    <div className="pizza">
-      <img src={props.photoName} alt={props.name} />
+    <li className="pizza">
+      <img src={props.pizzaObj.photoName} alt={props.pizzaObj.name} />
       <div>
-        <h3>{props.name}</h3>
-        <p> {props.ingredients}</p>
-        <span>{props.price}</span>
+        <h3>{props.pizzaObj.name}</h3>
+        <p> {props.pizzaObj.ingredients}</p>
+        <span>{props.pizzaObj.price}</span>
       </div>
-    </div>
+    </li>
   );
 }
 
@@ -108,7 +121,11 @@ function Footer() {
   // with jsx
   return (
     <footer className="footer">
-      {new Date().toLocaleTimeString()}. We are Currently Open !!
+      {isOpen && <div className="order">
+      <p>we are Currently open!! until:{closeHour}</p>
+      <button className="btn">Order</button>
+      </div>}{" "}
+      {/* we use conditional rendering here using && operator*/}
     </footer>
   );
 }
