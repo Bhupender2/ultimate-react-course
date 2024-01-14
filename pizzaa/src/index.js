@@ -70,13 +70,19 @@ function Menu() {
   return (
     <main className="menu">
       <h2>Our Menu</h2>
+     
       {/* rendering list using map function because inside div/ul we need jsx so we use map instead of forEach we will get new array using map and then react knows how to render it*/}
-      {numPizzas > 0 && (
-        <ul className="pizzas">
+      {numPizzas > 0 ? (
+       <> {/* using react fragment here we are using short form coz we dont want any key right now */}
+       <p>Authentic Italian cuisine . 6 creative dishes to choose from . All from  our ston oven , all organic , all delicious</p>
+       <ul className="pizzas">
           {pizzas.map((pizza) => {
             return <Pizza pizzaObj={pizza} key={pizza.name} />; // here we are passing a prop here
           })}
         </ul>
+       </>
+      ) : (
+        <p> we are still working on our menu please come back later :)</p>
       )}
 
       {/* <Pizza
@@ -94,15 +100,17 @@ function Menu() {
     </main>
   );
 }
-function Pizza(props) {
-  console.log(props);
+function Pizza({pizzaObj}) { // here also we have destructe the props
+  console.log(pizzaObj);
+
+  if (pizzaObj.soldOut) return null;
   return (
     <li className="pizza">
-      <img src={props.pizzaObj.photoName} alt={props.pizzaObj.name} />
-      <div>
-        <h3>{props.pizzaObj.name}</h3>
-        <p> {props.pizzaObj.ingredients}</p>
-        <span>{props.pizzaObj.price}</span>
+      <img src={pizzaObj.photoName} alt={pizzaObj.name} />
+      <div>                       
+        <h3>{pizzaObj.name}</h3>
+        <p> {pizzaObj.ingredients}</p>
+        <span>{pizzaObj.price}</span>
       </div>
     </li>
   );
@@ -121,12 +129,24 @@ function Footer() {
   // with jsx
   return (
     <footer className="footer">
-      {isOpen && <div className="order">
-      <p>we are Currently open!! until:{closeHour}</p>
-      <button className="btn">Order</button>
-      </div>}{" "}
+      {isOpen ? (
+        <Order  closeHour={closeHour} openHour={openHour}/>
+      ) : (
+        <p>
+          we happily invite you to visit use between {openHour} to {closeHour}
+        </p>
+      )}
       {/* we use conditional rendering here using && operator*/}
     </footer>
+  );
+}
+
+function Order({closeHour, openHour}) { // here we destructing the props here
+  return (
+    <div className="order">
+      <p>we are Currently open!! from:{closeHour}:00 to {openHour}:00 </p>
+      <button className="btn">Order</button>
+    </div>
   );
 }
 
