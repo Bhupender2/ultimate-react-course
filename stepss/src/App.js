@@ -12,14 +12,14 @@ export default function App() {
 
   function handlePrevious() {
     // we should never update the state manually we should always use setter function (tool given by react) to update the state .
-    if (step > 1) setStep(step - 1);
+    if (step > 1) setStep((s)=>s-1);
   }
 
   function handleNext() {
-    if (step < 3) setStep(step + 1);
+    if (step < 3) setStep((s)=>s+1);
   }
   function handleClose(){
-    setIsopen(!isopen)
+    setIsopen((is)=>!is) // here we are updating state based on current state which we should not do we should always pass a callback function which will recieves the current state as an argument in the callback function
   }
   return (
     <>
