@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: false },
   { id: 2, description: "Socks", quantity: 12, packed: true },
@@ -20,19 +22,34 @@ function Logo() {
 }
 
 function Form() {
+  // state should always be defined at the Top
+  const [description, setDescription] = useState("");
+  const [quantity, setQuantity] = useState(1);
+
   function handleSubmit(e) {
-    e.preventdefault();
+    e.preventDefault();
+    if(!description) return;
+    const newItem={description, quantity, packed:false}
+    console.log(newItem)
+    setDescription('');
+    setQuantity(1)
   }
+
   return (
     <form className="add-form" onSubmit={handleSubmit}>
       <h3>What do you need for your Trip 😍 ?</h3>
-      <select>
+      <select value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}>  {/*e.target.value will give a string so convert it*/}
         {/* basically used for selecting the options*/}
         {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
-          <option value={num}>{num}</option>
+          <option value={num} key={num}>{num}</option>
         ))}
       </select>
-      <input type="text" placeholder="items..." />{" "}
+      <input
+        type="text"
+        placeholder="items..."
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />{" "}
       {/* its the basic input tag where we basically enter the text we wanted*/}
       <button>add</button>
     </form>
@@ -44,7 +61,7 @@ function PackingList() {
     <div className="list">
       <ul>
         {initialItems.map((item) => (
-          <Item item={item} />
+          <Item item={item} key={item.id}/>
         ))}
       </ul>
     </div>
