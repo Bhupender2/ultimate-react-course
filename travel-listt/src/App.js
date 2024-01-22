@@ -28,27 +28,37 @@ function Form() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if(!description) return;
-    const newItem={description, quantity, packed:false}
-    console.log(newItem)
-    setDescription('');
-    setQuantity(1)
+    if (!description) return;
+    const newItem = { description, quantity, packed: false };
+    console.log(newItem);
+    setDescription("");
+    setQuantity(1);
   }
 
   return (
     <form className="add-form" onSubmit={handleSubmit}>
       <h3>What do you need for your Trip 😍 ?</h3>
-      <select value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}>  {/*e.target.value will give a string so convert it*/}
+      <select
+        value={quantity}
+        onChange={(e) => setQuantity(Number(e.target.value))}
+      >
+        {" "}
+        {/*e.target.value will give a string so convert it*/}
         {/* basically used for selecting the options*/}
         {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
-          <option value={num} key={num}>{num}</option>
+          <option value={num} key={num}>
+            {num}
+          </option>
         ))}
       </select>
       <input
         type="text"
         placeholder="items..."
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={(e) => {
+          console.log(e.target.value);
+          setDescription(e.target.value);
+        }}
       />{" "}
       {/* its the basic input tag where we basically enter the text we wanted*/}
       <button>add</button>
@@ -61,7 +71,7 @@ function PackingList() {
     <div className="list">
       <ul>
         {initialItems.map((item) => (
-          <Item item={item} key={item.id}/>
+          <Item item={item} key={item.id} />
         ))}
       </ul>
     </div>
