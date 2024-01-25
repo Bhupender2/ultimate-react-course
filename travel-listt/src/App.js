@@ -12,12 +12,25 @@ export default function App() {
   function handleDeleteItems(id) {
     setItems((items) => items.filter((item) => item.id !== id)); // we have to upadate the state with the help of previous state so we have to use callback so that we will not got an error because of js asynchronous behaviour
   }
+
+  function handleToggleItems(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
+
   return (
     <div className="app">
       <Logo />
       <Form onAddItems={handleItems} />{" "}
       {/*we can pass anything as a function here*/}
-      <PackingList items={items} onDeleteItems={handleDeleteItems} />
+      <PackingList
+        items={items}
+        onDeleteItems={handleDeleteItems}
+        onToggleItems={handleToggleItems}
+      />
       <Stats items={items} />
     </div>
   );
@@ -67,40 +80,92 @@ function Form({ onAddItems }) {
           console.log(e.target.value);
           setDescription(e.target.value);
         }}
-      />{" "}
+      />
       {/* its the basic input tag where we basically enter the text we wanted*/}
       <button>add</button>
     </form>
   );
 }
 
-function PackingList({ items, onDeleteItems }) {
+function PackingList({ items, onDeleteItems, onToggleItems }) {
+  const [sortedBy, setSortedBy] = useState("input"); // we now use derived state (meaning we will not make another state variable we will derive all this from the sorted state variable)
+  let sortedItems;
+
+  if (sortedBy === "input") sortedItems = items;
+  else if (sortedBy === "description") {
+    sortedItems = items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description)); //we are first make a copy of item array beacuse sort method is a mutable method and react is all about immutablity
+  } else if (sortedBy === "packed") {
+    sortedItems = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
+  }
+
   return (
     <div className="list">
       <ul>
-        {items.map((item) => (
-          <Item item={item} key={item.id} onDeleteItems={onDeleteItems} />
+        {sortedItems.map((item) => (
+          <Item
+            item={item}
+            key={item.id}
+            onDeleteItems={onDeleteItems}
+            onToggleItems={onToggleItems}
+          />
         ))}
       </ul>
+
+      <div className="actions">
+        <select value={sortedBy} onChange={(e) => setSortedBy(e.target.value)}>
+          <option value="input">sort by input</option>
+          <option value="description">sort by description</option>
+          <option value="packed">sort by packed status</option>
+        </select>
+      </div>
     </div>
   );
 }
 
-function Item({ item, onDeleteItems }) {
+function Item({ item, onDeleteItems, onToggleItems }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => onToggleItems(item.id)}
+      />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
-      <button onClick={() => onDeleteItems(item.id)}>❌</button> {/*we want to run this event handler on clicking*/}
+      <button onClick={() => onDeleteItems(item.id)}>❌</button>{" "}
+      {/*we want to run this event handler on clicking*/}
     </li>
   );
 }
 
 function Stats({ items }) {
+  if (!items.length) {
+    return (
+      <footer className="stats">
+        <em>start adding items that you need for travel ✈️</em>
+      </footer>
+    );
+  }
+  const numItems = items.length;
+
+  const packedItems = items.filter((item) => item.packed).length;
+
+  const packedPercentageItems = Math.round((packedItems / numItems) * 100);
   return (
     <footer className="stats">
-      <em>{`You have ${items.length} items on your list, and you have already packed X (X%)`}</em>
+      <em>
+        {packedPercentageItems === 100
+          ? "you have got everything to go ✈️"
+          : `  
+        You have ${numItems} items on your list, and you have already packed ${packedItems} (${
+              packedPercentageItems ? packedPercentageItems : 0
+            }%)`}
+      </em>
     </footer>
   );
 }
