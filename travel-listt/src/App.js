@@ -20,6 +20,10 @@ export default function App() {
       )
     );
   }
+  function handleClearItems() {
+    const confirmed = window.confirm("Are You sure you want to delete it"); //just a Dom function not a part of js but its a part of web api
+    if (confirmed) setItems([]);
+  }
 
   return (
     <div className="app">
@@ -30,6 +34,7 @@ export default function App() {
         items={items}
         onDeleteItems={handleDeleteItems}
         onToggleItems={handleToggleItems}
+        onClearAllItems={handleClearItems}
       />
       <Stats items={items} />
     </div>
@@ -87,7 +92,7 @@ function Form({ onAddItems }) {
   );
 }
 
-function PackingList({ items, onDeleteItems, onToggleItems }) {
+function PackingList({ items, onDeleteItems, onToggleItems, onClearAllItems }) {
   const [sortedBy, setSortedBy] = useState("input"); // we now use derived state (meaning we will not make another state variable we will derive all this from the sorted state variable)
   let sortedItems;
 
@@ -121,6 +126,7 @@ function PackingList({ items, onDeleteItems, onToggleItems }) {
           <option value="description">sort by description</option>
           <option value="packed">sort by packed status</option>
         </select>
+        <button onClick={onClearAllItems}>Clear List</button>
       </div>
     </div>
   );
@@ -165,7 +171,7 @@ function Stats({ items }) {
         You have ${numItems} items on your list, and you have already packed ${packedItems} (${
               packedPercentageItems ? packedPercentageItems : 0
             }%)`}
-      </em> 
+      </em>
     </footer>
   );
 }
