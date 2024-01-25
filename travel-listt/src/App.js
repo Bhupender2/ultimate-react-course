@@ -165,7 +165,7 @@ function Stats({ items }) {
         You have ${numItems} items on your list, and you have already packed ${packedItems} (${
               packedPercentageItems ? packedPercentageItems : 0
             }%)`}
-      </em>
+      </em> 
     </footer>
   );
 }
