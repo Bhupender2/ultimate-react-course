@@ -21,27 +21,16 @@ const initialFriends = [
   },
 ];
 
-function Button({ children, onSet }) {
-  return (
-    <button className="button" onClick={onSet}>
-      {children}
-    </button>
-  );
-}
-
-export default function App() {
+export default function AppTest() {
   const [add, setAdd] = useState(false); // creating a state to render components
-  function handleSetAdd() {
-    setAdd((add) => !add);
-  }
   return (
     <div className="app">
       <div className="sidebar">
         <FriendsList />
-        {add && <AddFriendForm />} {/* This is rendered conditionally */}
-        <Button add={add} onSet={handleSetAdd}>
-          {add ? "close" : "Add Friend"}
+        <Button add={add} onAdd={setAdd}>
+          Add Friend
         </Button>
+        <AddFriendForm add={add} onAdd={setAdd} />
       </div>
       <Form />
     </div>
@@ -103,14 +92,29 @@ function Form() {
   );
 }
 
-function AddFriendForm() {
+function Button({ children, add, onAdd }) {
+  return !add ? (
+    <button className="button" onClick={() => onAdd(!add)}>
+      {children}
+    </button>
+  ) : null;
+}
+
+function AddFriendForm({ add, onAdd }) {
   return (
-    <form className="form-add-friend">
-      <label> 🐶Friend name</label>
-      <input type="text" />
-      <label>🌇 Image Url</label>
-      <input type="text" />
-      <Button>Add</Button>
-    </form>
+    <>
+      {add && (
+        <form className="form-add-friend">
+          <label> 🐶Friend name</label>
+          <input type="text" />
+          <label>🌇 Image Url</label>
+          <input type="text" />
+          <button className="button">Add</button>
+          <button className="button" onClick={() => onAdd(!add)}>
+            close
+          </button>
+        </form>
+      )}
+    </>
   );
 }
