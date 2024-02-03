@@ -31,7 +31,7 @@ function Button({ children, onClick }) {
 
 export default function App() {
   const [add, setAdd] = useState(false); // creating a state to render components
-  const [friends, setFriends] = useState(initialFriends); // creating a lifted up state so that we can display and update this data in both children components (friendsList and AddFriendForm respectively)
+  const [frien     ds, setFriends] = useState(initialFriends); // creating a lifted up state so that we can display and update this data in both children components (friendsList and AddFriendForm respectively)
 
   const [selectedFriend, setSelectedFriend] = useState(null); // this is a lifted Up state so that friends and form component can communicate with each other
   function handleSetAdd() {
@@ -47,6 +47,18 @@ export default function App() {
     //closing the addFriendForm here because if we open both forms then it will look weird.
     setAdd(false);
   }
+
+  function handleSplitBill(value) {
+    console.log(value);
+    setFriends((friends) =>
+      friends.map((friend) =>
+        friend.id === selectedFriend.id
+          ? { ...friend, balance: friend.balance + value }
+          : friend
+      )
+    );
+    setSelectedFriend(null); // on clicking split bill the sptill bill form will be dissappered
+  }
   return (
     <div className="app">
       <div className="sidebar">
@@ -61,7 +73,9 @@ export default function App() {
           {add ? "close" : "Add Friend"}
         </Button>
       </div>
-      {selectedFriend && <Form selectedFriend={selectedFriend} />}
+      {selectedFriend && (
+        <Form selectedFriend={selectedFriend} onSplitBill={handleSplitBill} />
+      )}
     </div>
   );
 }
@@ -107,15 +121,16 @@ function Friends({ friend, onSelectFriend, selectedFriend }) {
   );
 }
 
-function Form({ selectedFriend }) {
+function Form({ selectedFriend, onSplitBill }) {
   const [bill, setBill] = useState("");
   const [paidByUser, setPaidByUser] = useState("");
   const paidByFriend = bill ? bill - paidByUser : "";
   const [whoIsPaying, setWhoisPaying] = useState("user");
 
-  function handleBillSubmit(e){
+  function handleBillSubmit(e) {
     e.preventDefault(); // preventing the form from reloading on submission
-    
+    if (!bill || !paidByUser) return;
+    onSplitBill(whoIsPaying === "user" ? paidByFriend : -paidByUser);
   }
   return (
     <form className="form-split-bill" onSubmit={handleBillSubmit}>
