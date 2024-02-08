@@ -39,7 +39,10 @@ function Tabbed({ content }) {
       </div>
 
       {activeTab <= 2 ? (
-        <TabContent item={content.at(activeTab)} />
+        <TabContent
+          item={content.at(activeTab)}
+          key={content.at(activeTab).summary} //here we are giving key so react will distinguish an consider it as a new component instance so it will destroyed the new one and state will be reset
+        />
       ) : (
         <DifferentContent />
       )}

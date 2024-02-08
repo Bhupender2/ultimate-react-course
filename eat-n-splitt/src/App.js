@@ -31,7 +31,7 @@ function Button({ children, onClick }) {
 
 export default function App() {
   const [add, setAdd] = useState(false); // creating a state to render components
-  const [frien     ds, setFriends] = useState(initialFriends); // creating a lifted up state so that we can display and update this data in both children components (friendsList and AddFriendForm respectively)
+  const [friends, setFriends] = useState(initialFriends); // creating a lifted up state so that we can display and update this data in both children components (friendsList and AddFriendForm respectively)
 
   const [selectedFriend, setSelectedFriend] = useState(null); // this is a lifted Up state so that friends and form component can communicate with each other
   function handleSetAdd() {
@@ -74,7 +74,7 @@ export default function App() {
         </Button>
       </div>
       {selectedFriend && (
-        <Form selectedFriend={selectedFriend} onSplitBill={handleSplitBill} />
+        <Form selectedFriend={selectedFriend} onSplitBill={handleSplitBill}  key={selectedFriend.id}/> //passing a key so that the react knows that this is a new component instance and it will destroy the old component instance and state will be updated
       )}
     </div>
   );
