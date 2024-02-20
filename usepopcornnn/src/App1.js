@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const tempMovieData = [
   {
@@ -50,46 +50,10 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const KEY = "57f10299";
-
-export default function App() {
+export default function App1() {
   // only responsible for the structure so its a structural component
-  const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const tempQuery = "interstellar";
-
-  // this is where we are going to update state inside the render phase which makes an infinite loop which is the worst thing to do
-
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true); // we havent fetch the data so we will put it to false
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${tempQuery}`
-        );
-
-        if (!res.ok) {
-          throw new Error("something went wrong while fetching API"); // error we are throwing here will go to the catch block
-        }
-        const data = await res.json();
-        if (data.Response === "False") {
-          throw new Error("movie not Found"); // error we are throwing here will go to the catch block
-        }
-        setMovies(data.Search);
-      } catch (err) {
-        console.error(err.message); //err.message will be the msg that we throw on try block
-        setError(err.message);
-      } finally {
-        // this block will be executed in the end
-        setIsLoading(false); // we have fetch all the data so we can set the loading to false
-      }
-    }
-
-    fetchMovies();
-  }, []);
-
+  const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
   return (
     <>
       <Navbar>
@@ -98,14 +62,10 @@ export default function App() {
       </Navbar>
       <Main>
         <Box movies={movies}>
-          {/* {isLoading ? <Loader /> : <MoviesList movies={movies} />} */}
-
-          {/*we made a component composition we made a reusable component here*/}
-          {isLoading && <Loader />}
-          {!isLoading && !error && <MoviesList movies={movies} />}
-          {error && <ErrorMessage message={error} />}
+          {" "}
+          {/* we made a component composition we made a reusable component here*/}
+          <MoviesList movies={movies} />
         </Box>
-
         <Box>
           <WatchedSummary watched={watched} />
 
@@ -113,19 +73,6 @@ export default function App() {
         </Box>
       </Main>
     </>
-  );
-}
-
-function Loader() {
-  return <p className="loader">loading...</p>;
-}
-
-function ErrorMessage({ message }) {
-  return (
-    <p className="error">
-      <span>⛔</span>
-      {message}
-    </p>
   );
 }
 
