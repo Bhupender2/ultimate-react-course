@@ -54,6 +54,7 @@ body {
   max-width: 42rem;
   background-color: var(--color-background-500);
   border-radius: 0.9rem;
+  overflow: scroll; 
  /* overflow: scroll;   i have commented that scroll here */ 
   position: relative;
 }
@@ -138,6 +139,7 @@ body {
 .list {
   list-style: none;
   padding: 0.8rem 0;
+  overflow: scroll
   /* overflow: scroll;   i have commented that scroll here */ 
 }
 

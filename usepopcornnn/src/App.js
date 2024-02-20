@@ -54,62 +54,96 @@ const KEY = "57f10299";
 
 export default function App() {
   // only responsible for the structure so its a structural component
+  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const tempQuery = "interstellar";
+  const [selectedId, setSelectedId] = useState(null);
+
+  function handleSelectMovie(id) {
+    setSelectedId((selectedId) => (id === selectedId ? null : id)); // we are updating the state here
+  }
+
+  // closing the selected movie
+  function handleCloseMovie() {
+    setSelectedId(null);
+  }
 
   // this is where we are going to update state inside the render phase which makes an infinite loop which is the worst thing to do
 
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true); // we havent fetch the data so we will put it to false
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${tempQuery}`
-        );
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        try {
+          setIsLoading(true); // we havent fetch the data so we will put it to false
+          setError("");
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          );
 
-        if (!res.ok) {
-          throw new Error("something went wrong while fetching API"); // error we are throwing here will go to the catch block
+          if (!res.ok) {
+            throw new Error("something went wrong while fetching API"); // error we are throwing here will go to the catch block
+          }
+          const data = await res.json();
+          if (data.Response === "False") {
+            throw new Error("movie not Found"); // error we are throwing here will go to the catch block
+          }
+          setMovies(data.Search);
+        } catch (err) {
+          console.error(err.message); //err.message will be the msg that we throw on try block
+          setError(err.message);
+        } finally {
+          // this block will be executed in the end
+          setIsLoading(false); // we have fetch all the data so we can set the loading to false
         }
-        const data = await res.json();
-        if (data.Response === "False") {
-          throw new Error("movie not Found"); // error we are throwing here will go to the catch block
+        if (query.length < 3) {
+          setMovies([]);
+          setError("");
+          return;
         }
-        setMovies(data.Search);
-      } catch (err) {
-        console.error(err.message); //err.message will be the msg that we throw on try block
-        setError(err.message);
-      } finally {
-        // this block will be executed in the end
-        setIsLoading(false); // we have fetch all the data so we can set the loading to false
       }
-    }
 
-    fetchMovies();
-  }, []);
+      fetchMovies();
+    },
+    [query]
+  );
 
   return (
     <>
       <Navbar>
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </Navbar>
       <Main>
-        <Box movies={movies}>
+        <Box>
           {/* {isLoading ? <Loader /> : <MoviesList movies={movies} />} */}
 
           {/*we made a component composition we made a reusable component here*/}
           {isLoading && <Loader />}
-          {!isLoading && !error && <MoviesList movies={movies} />}
+          {!isLoading && !error && (
+            <MoviesList
+              movies={movies}
+              selectedId={selectedId}
+              onSelectedMovie={handleSelectMovie}
+            />
+          )}
           {error && <ErrorMessage message={error} />}
         </Box>
 
         <Box>
-          <WatchedSummary watched={watched} />
+          {selectedId ? (
+            <MovieDetails
+              selectedId={selectedId}
+              onCloseMovie={handleCloseMovie}
+            />
+          ) : (
+            <>
+              <WatchedSummary watched={watched} />
 
-          <WatchedMoviesList watched={watched} />
+              <WatchedMoviesList watched={watched} />
+            </>
+          )}
         </Box>
       </Main>
     </>
@@ -157,9 +191,8 @@ function Logo() {
   );
 }
 
-function Search() {
+function Search({ query, setQuery }) {
   //stateful component
-  const [query, setQuery] = useState("");
   return (
     <input
       className="search"
@@ -187,31 +220,48 @@ function Box({ children }) {
     </div>
   );
 }
-function MoviesList({ movies }) {
+function MoviesList({ movies, selectedId, onSelectedMovie }) {
   //stateful component
 
   return (
-    <ul className="list">
+    <ul className="list list-movies">
       {movies?.map((movie) => (
-        <Movie movie={movie} key={movie.imdbID} />
+        <Movie
+          movie={movie}
+          key={movie.imdbID}
+          selectedId={selectedId}
+          onSelectedMovie={onSelectedMovie}
+        /> // we have to do prop drilling but its only one level so its okay
       ))}
     </ul>
   );
 }
 
-function Movie({ movie }) {
+function Movie({ movie , onSelectedMovie }) {
   // stateless component(presentational component)
   return (
-    <li>
+    <li onClick={() => onSelectedMovie(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
-      <div>
+      <div>  
         <p>
           <span>🗓</span>
           <span>{movie.Year}</span>
         </p>
       </div>
     </li>
+  );
+}
+
+function MovieDetails({ selectedId, onCloseMovie }) {
+  return (
+    <div className="details">
+      <button className="btn-back" onClick={onCloseMovie }>
+        &larr;
+      </button>
+
+      {selectedId}
+    </div>
   );
 }
 
