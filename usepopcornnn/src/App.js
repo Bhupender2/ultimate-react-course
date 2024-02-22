@@ -321,7 +321,7 @@ function MovieDetails({ selectedId, onCloseMovie }) {
             </p>
             <p>Starring {actors}</p>
             <p>Directed by {director}</p>
-          </section>
+          </section>          
         </>
       )}
     </div>
