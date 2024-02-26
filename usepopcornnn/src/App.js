@@ -71,8 +71,17 @@ export default function App() {
     setSelectedId(null);
   }
 
-  // this is where we are going to update state inside the render phase which makes an infinite loop which is the worst thing to do
+  //adding a movie in the watched list
+  function handleAddWatched(movie) {
+    setWatched((watched) => [...watched, movie]); //get the current watched movies array and duplicate it and add the current movie object in it .
+  }
+  // deleting the elements
 
+  function handleDeleteWatched(id) {
+    setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
+  }
+
+  // this is where we are going to update state inside the render phase which makes an infinite loop which is the worst thing to do
   useEffect(
     function () {
       async function fetchMovies() {
@@ -137,12 +146,17 @@ export default function App() {
             <MovieDetails
               selectedId={selectedId}
               onCloseMovie={handleCloseMovie}
+              onAddWatched={handleAddWatched}
+              watched={watched}
             />
           ) : (
             <>
               <WatchedSummary watched={watched} />
 
-              <WatchedMoviesList watched={watched} />
+              <WatchedMoviesList
+                watched={watched}
+                onDeleteWatched={handleDeleteWatched}
+              />
             </>
           )}
         </Box>
@@ -254,9 +268,14 @@ function Movie({ movie, onSelectedMovie }) {
   );
 }
 
-function MovieDetails({ selectedId, onCloseMovie }) {
+function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({}); // it will be an empty object beacuse its a json (omdb API)
   const [isLoading, setIsLoading] = useState(false);
+
+  const [userRating, setUserRating] = useState("");
+
+  const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId); //this is the derived state we can use if the movie is already selected or not
+  const watchedUserRating = watched.find((movie) => movie.imdbID)?.userRating;
   const {
     Title: title,
     Year: year,
@@ -270,6 +289,21 @@ function MovieDetails({ selectedId, onCloseMovie }) {
     Genre: genre,
   } = movie;
   // destructing and renaming the key name here :)
+
+  function handleAdd() {
+    const newWatchedMovie = {
+      imdbID: selectedId,
+      title,
+      year,
+      poster,
+      imdbRating: Number(imdbRating),
+      runtime: Number(runtime.split(" ").at(0)),
+      userRating,
+    };
+
+    onAddWatched(newWatchedMovie);
+    onCloseMovie(); // after adding the movie to the add watched list we want to close that movie details
+  }
 
   useEffect(
     function () {
@@ -314,14 +348,32 @@ function MovieDetails({ selectedId, onCloseMovie }) {
           </header>
           <section>
             <div className="rating">
-              <StarRating maxRating={10} size={24} />
+              {isWatched ? (
+                <p>
+                  You rated this movie {watchedUserRating}
+                  <span>⭐</span>
+                </p>
+              ) : (
+                <>
+                  <StarRating
+                    maxRating={10}
+                    size={24}
+                    onSetRating={setUserRating}
+                  />
+                  {userRating > 0 && (
+                    <button className="btn-add" onClick={handleAdd}>
+                      + Add to list
+                    </button>
+                  )}
+                </>
+              )}
             </div>
             <p>
               <em>{plot}</em>
             </p>
             <p>Starring {actors}</p>
             <p>Directed by {director}</p>
-          </section>          
+          </section>
         </>
       )}
     </div>
@@ -358,23 +410,27 @@ function WatchedSummary({ watched }) {
   );
 }
 
-function WatchedMoviesList({ watched }) {
+function WatchedMoviesList({ watched, onDeleteWatched }) {
   //presentational component
   return (
     <ul className="list">
       {watched.map((movie) => (
-        <WatchedMovie movie={movie} key={movie.imdbID} />
+        <WatchedMovie
+          movie={movie}
+          key={movie.imdbID}
+          onDeleteWatched={onDeleteWatched}
+        />
       ))}
     </ul>
   );
 }
 
-function WatchedMovie({ movie }) {
+function WatchedMovie({ movie, onDeleteWatched }) {
   //presentational component
   return (
     <li>
-      <img src={movie.Poster} alt={`${movie.Title} poster`} />
-      <h3>{movie.Title}</h3>
+      <img src={movie.poster} alt={`${movie.title} poster`} />
+      <h3>{movie.title}</h3>
       <div>
         <p>
           <span>⭐️</span>
@@ -388,6 +444,10 @@ function WatchedMovie({ movie }) {
           <span>⏳</span>
           <span>{movie.runtime} min</span>
         </p>
+        <button
+          className="btn-delete"
+          onClick={() => onDeleteWatched(movie.imdbID)} // here we are deleting the watched movie list
+        > X </button>
       </div>
     </li>
   );
