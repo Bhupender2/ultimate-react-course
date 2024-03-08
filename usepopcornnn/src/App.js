@@ -57,10 +57,14 @@ export default function App() {
   // only responsible for the structure so its a structural component
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  // const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+  const [watched, setWatched] = useState(function () {
+  const storedValue= localStorage.getItem("Watched")
+  return JSON.parse(storedValue) // converted that string into array of objects
+  });
 
   function handleSelectMovie(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id)); // we are updating the state here
@@ -74,12 +78,24 @@ export default function App() {
   //adding a movie in the watched list
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]); //get the current watched movies array and duplicate it and add the current movie object in it .
+    // localStorage.setItem(
+    //   "Watched",
+    //   JSON.stringify( [...watched, movie]) // storing the data locally and this is not the best method
+    // );
   }
   // deleting the elements
 
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
+
+  // how to store local storage in a more effective way
+  useEffect(
+    function () {
+      localStorage.setItem("Watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   // this is where we are going to update state inside the render phase which makes an infinite loop which is the worst thing to do
   useEffect(
@@ -118,7 +134,7 @@ export default function App() {
         setError("");
         return; // After setting the states, it exits the useEffect hook immediately. This prevents the further execution of the fetchMovies() function and any side effects associated with it.
       }
-      handleCloseMovie() // whenever we are searching another movie pehle wali movie detail should be closed
+      handleCloseMovie(); // whenever we are searching another movie pehle wali movie detail should be closed
 
       fetchMovies();
 
@@ -435,7 +451,7 @@ function WatchedSummary({ watched }) {
         </p>
         <p>
           <span>⏳</span>
-          <span>{avgRuntime} min</span>
+          <span>{avgRuntime.toFixed(2)} min</span>
         </p>
       </div>
     </div>
