@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import StarRating from "./StarRating";
 
 const tempMovieData = [
@@ -62,8 +62,8 @@ export default function App() {
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [watched, setWatched] = useState(function () {
-  const storedValue= localStorage.getItem("Watched")
-  return JSON.parse(storedValue) // converted that string into array of objects
+    const storedValue = localStorage.getItem("Watched");
+    return JSON.parse(storedValue); // converted that string into array of objects
   });
 
   function handleSelectMovie(id) {
@@ -233,7 +233,26 @@ function Logo() {
 }
 
 function Search({ query, setQuery }) {
-  //stateful component
+  // stateless component(presentational component)
+  const inpuEl = useRef(null);
+  useEffect(
+    function () {
+      function callback(e) {
+        if (document.activeElement === inpuEl.current) return;
+        if (e.code === "Enter") {
+          inpuEl.current.focus();
+          setQuery("");
+        }
+      }
+      document.addEventListener("keydown", callback);
+
+      return () => {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [setQuery]
+  );
+
   return (
     <input
       className="search"
@@ -241,6 +260,7 @@ function Search({ query, setQuery }) {
       placeholder="Search movies..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inpuEl}
     />
   );
 }
@@ -262,7 +282,7 @@ function Box({ children }) {
   );
 }
 function MoviesList({ movies, selectedId, onSelectedMovie }) {
-  //stateful component
+  // stateless component(presentational component)
 
   return (
     <ul className="list list-movies">
@@ -300,6 +320,17 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
   const [userRating, setUserRating] = useState("");
 
+  const countRef = useRef(0);
+
+  useEffect(
+    function () {
+      if (userRating) {
+        countRef.current++;
+      }
+    },
+    [userRating]
+  );
+
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId); //this is the derived state we can use if the movie is already selected or not
   const watchedUserRating = watched.find((movie) => movie.imdbID)?.userRating; // if its already selected so show the already given user rating on the movie deatils component
   const {
@@ -325,6 +356,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(" ").at(0)),
       userRating,
+      countRatingDecisions: countRef.current,
     };
 
     onAddWatched(newWatchedMovie);
