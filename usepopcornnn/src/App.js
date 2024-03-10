@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import StarRating from "./StarRating";
+import { useKey } from "./useKey";
 import { useLocalStorageState } from "./useLocalStorageState";
 import { useMovies } from "./useMovies";
 
@@ -62,9 +63,7 @@ export default function App() {
   //using useMovies Costum Hooks
   const { movies, isLoading, error } = useMovies(query);
 
-  const [watched, setWatched] = useLocalStorageState([], "Watched");//trying to make this costum hook similar to useState
-
-
+  const [watched, setWatched] = useLocalStorageState([], "Watched"); //trying to make this costum hook similar to useState
 
   function handleSelectMovie(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id)); // we are updating the state here
@@ -89,7 +88,6 @@ export default function App() {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
- 
   return (
     <>
       <Navbar>
@@ -180,23 +178,13 @@ function Logo() {
 function Search({ query, setQuery }) {
   // stateless component(presentational component)
   const inpuEl = useRef(null);
-  useEffect(
-    function () {
-      function callback(e) {
-        if (document.activeElement === inpuEl.current) return;
-        if (e.code === "Enter") {
-          inpuEl.current.focus();
-          setQuery("");
-        }
-      }
-      document.addEventListener("keydown", callback);
+  // useKey costum hook for pressing "Enter"
 
-      return () => {
-        document.removeEventListener("keydown", callback);
-      };
-    },
-    [setQuery]
-  );
+  useKey("Enter", function () {
+    if (document.activeElement === inpuEl.current) return;
+    inpuEl.current.focus();
+    setQuery("");
+  });
 
   return (
     <input
@@ -307,19 +295,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     onAddWatched(newWatchedMovie);
     onCloseMovie(); // after adding the movie to the add watched list we want to close that movie details
   }
-  //ESC button escape
-  useEffect(() => {
-    function callback(e) {
-      if (e.code === "Escape") {
-        onCloseMovie();
-      }
-    }
-    document.addEventListener("keydown", callback); // whenever we press the ESC button
-
-    return function () {
-      document.removeEventListener("keydown", callback); //whenever the component unmounted or re-render the clean up function should be executed otherwise all the event listener will be added to the DOM which create memory problem /performance issues
-    };
-  }, [onCloseMovie]);
+  useKey("Escape", onCloseMovie); // costum hook for pressing the Escape key
 
   useEffect(
     function () {
