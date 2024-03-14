@@ -1,15 +1,21 @@
-import { useReducer, useState } from "react";
+import { useReducer } from "react";
+
+const initialState = { count: 0, step: 1 };
 
 function reducer(state, action) {
   // reducer function will take current state and actions as an argument and return a new state
-  if (action.type === "inc") return state + 1;
-  if (action.type === "dec") return state - 1;
-  if (action.type === "setCount") return action.payload;
+  switch (action.type) {
+    case "inc":
+      return { ...state, count: state.count + 1 };
+    case "dec":
+      return { ...state, count: state.count - 1 };
+    case "setCount":
+      return { ...state, count: action.payload };
+  }
 }
 function DateCounter() {
-  // const [count, setCount] = useState(0);
-  const [step, setStep] = useState(1);
-  const [count, dispatch] = useReducer(reducer, 0); // this is use Reducer it takes reducer function and intial state value as an argument and return current state and dispatch function as a result
+  const [state, dispatch] = useReducer(reducer, initialState); // this is use Reducer it takes reducer function and intial state value as an argument and return current state and dispatch function as a result and usually the initial state going to be an object not a single value beacuse we use useReducer to handle more complex value rather than a single value
+  const { count, step } = state; // and now destructing it
 
   // This mutates the date object.
   const date = new Date("june 21 2027");
@@ -17,29 +23,19 @@ function DateCounter() {
 
   const dec = function () {
     dispatch({ type: "dec" });
-    // setCount((count) => count - 1);
-    // setCount((count) => count - step);
   };
 
   const inc = function () {
     dispatch({ type: "inc" }); // dispatch function is used to dispatch actions
-    // setCount((count) => count + 1);
-    // setCount((count) => count + step);
   };
 
   const defineCount = function (e) {
-    // setCount(Number(e.target.value));
     dispatch({ type: "setCount", payload: Number(e.target.value) }); // this is the standard way of writing action and here payload is optional basicallly we can shape action object in whatever way we want but this is the standard way
   };
 
-  const defineStep = function (e) {
-    setStep(Number(e.target.value));
-  };
+  const defineStep = function (e) {};
 
-  const reset = function () {
-    // setCount(0);
-    setStep(1);
-  };
+  const reset = function () {};
 
   return (
     <div className="counter">
