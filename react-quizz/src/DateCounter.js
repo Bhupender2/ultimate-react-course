@@ -6,11 +6,15 @@ function reducer(state, action) {
   // reducer function will take current state and actions as an argument and return a new state
   switch (action.type) {
     case "inc":
-      return { ...state, count: state.count + 1 };
+      return { ...state, count: state.count + state.step };
     case "dec":
-      return { ...state, count: state.count - 1 };
+      return { ...state, count: state.count - state.step };
     case "setCount":
       return { ...state, count: action.payload };
+    case "setStep": 
+      return { ...state, step: action.payload };
+    default:
+      throw new Error("Unknown Error");
   }
 }
 function DateCounter() {
@@ -33,7 +37,9 @@ function DateCounter() {
     dispatch({ type: "setCount", payload: Number(e.target.value) }); // this is the standard way of writing action and here payload is optional basicallly we can shape action object in whatever way we want but this is the standard way
   };
 
-  const defineStep = function (e) {};
+  const defineStep = function (e) {
+    dispatch({ type: "setStep", payload: Number(e.target.value) });
+  };
 
   const reset = function () {};
 
